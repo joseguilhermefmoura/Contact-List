@@ -9,13 +9,22 @@ int main(){
 	mainListControl = (ListControl *) malloc(sizeof(ListControl));
 	mainListControl->first = NULL;
 	mainListControl->last  = NULL;
+	mainListControl->lenght = 0;
+
+	{ /* ~~~~~ Code to load the contacts of contacts.db ~~~~~~ */
+		setUpContacts();
+		if(allowLoadContacts)
+			for(auxiliary_1 = 1; auxiliary_1 <= auxiliary_2; auxiliary_1++)
+				mainList = loadContacts(mainList, mainListControl);
+	} /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	
 	char ch;  /* Menu variables */
-	int  Ich; /* to get the option. */
+	int  Ich; 
+	bool continue_to_run = true;
 	
 	{ /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  MAIN MENU ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		while(1){
-			clearScreen();          
+		while(continue_to_run){
+			clearScreen();
 			printf("\n");
 			printf("\tWelcome to your contact list.\n");
 			printf("\tTo continue, choose an option:\n");
@@ -52,7 +61,7 @@ int main(){
 					break;
 				case ESC:
 					clearScreen();
-					exit(EXIT_SUCCESS);
+					continue_to_run = false;
 					break;
 				default:
 					break;
@@ -60,6 +69,7 @@ int main(){
 		}
 	} /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  END OF MAIN MENU ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	
-	return 0;
+	saveContacts(mainList, mainListControl);
+	
+	return EXIT_SUCCESS;
 }
-
