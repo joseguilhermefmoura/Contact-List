@@ -10,17 +10,19 @@
 #define EXIT_FAILURE 1
 #define ESC 27
 
-int numberOfErrors = 0;
-
+int auxiliary_1 = 0;
+int auxiliary_2 = 0;
 typedef int bool;
 #define true 1
 #define false 0
+
+bool allowLoadContacts = true;
 
 typedef struct element {
 	char completeName[100];
 	char emailAddress[100];
 	char homeAddress[100];
-	char dateOfBirth[10];
+	char dateOfBirth[15];
 	char cellphoneNumber[15];
 	char workphoneNumber[15];
 
