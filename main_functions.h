@@ -1,7 +1,12 @@
+void setUpContacts();
+
 /* Menu functions */
 List *addNewElement(List *, ListControl *);
+List *loadContacts(List *, ListControl *);
 void  printFullList(List *, ListControl *);
 void  searchInList(List *, ListControl *);
+void  removeAnElement(List *, ListControl *);
+void  updateAnElement(List *, ListControl *);
 /* ~~~~ ~~~~ ~~~~ */
 
 /* Getting-data functions */
@@ -13,6 +18,118 @@ char *getCellphoneNumber();
 char *getWorkphoneNumber();
 /* ~~~~ ~~~~~ ~~~~~ ~~~~~ */
 
+void setUpContacts(){
+	FILE *contacts;
+	contacts = fopen("contacts.db", "a+");
+	if(contacts == NULL)
+		exit(EXIT_FAILURE);
+	fclose(contacts);
+	
+	contacts = fopen("contacts.db", "r");
+	if(contacts == NULL)
+		exit(EXIT_FAILURE);
+		
+	char analyzing = 'x';
+	int j = 0;
+	
+	while(analyzing != '#'){
+		analyzing = fgetc(contacts);
+		if(j == 0 && analyzing != '$')
+			break;
+		if(analyzing == '$')
+			auxiliary_2++;
+		j++;
+	}
+	
+	if(auxiliary_2 == 0)
+		allowLoadContacts = false;
+	
+	fclose(contacts);
+};
+
+void saveContacts(List *li, ListControl *liC){
+	FILE *contacts;
+	List *element;
+	contacts = fopen("contacts.db", "w");
+	if(contacts == NULL)
+		exit(EXIT_FAILURE);
+	
+	if(liC->lenght > 0){
+		for(element = liC->first; element != NULL; element = element->after){
+			fprintf(contacts, "$\n");
+			fprintf(contacts, "%s\n",  element->completeName);
+			fprintf(contacts, "%s\n",  element->emailAddress);
+			fprintf(contacts, "%s\n",  element->homeAddress);
+			fprintf(contacts, "%s\n",  element->dateOfBirth);
+			fprintf(contacts, "%s\n",  element->cellphoneNumber);
+			fprintf(contacts, "%s\n",  element->workphoneNumber);
+		}
+		fprintf(contacts, "#\n");
+	}
+};
+List *loadContacts(List *li, ListControl *liC){
+	List 	*element;
+	element = (List *) malloc(sizeof(List));
+	if(element == NULL)
+		exit(EXIT_FAILURE);
+		
+	FILE *contacts;
+	contacts = fopen("contacts.db", "r");
+	
+	char analyzing;
+	char completeName[100];
+	char emailAddress[100];
+	char homeAddress[100];
+	char dateOfBirth[10];
+	char cellphoneNumber[15];
+	char workphoneNumber[15];
+	int  i = 1;
+	
+	strcpy(completeName,    " ");
+	strcpy(emailAddress,    " ");
+	strcpy(homeAddress,     " ");
+	strcpy(dateOfBirth,     " ");
+	strcpy(cellphoneNumber, " ");
+	strcpy(workphoneNumber, " ");
+	
+	while(i <= auxiliary_1){
+		fscanf(contacts, " %c",      &analyzing);
+		fscanf(contacts, " %[^\n]s", completeName);
+		fscanf(contacts, " %[^\n]s", emailAddress);
+		fscanf(contacts, " %[^\n]s", homeAddress);
+		fscanf(contacts, " %[^\n]s", dateOfBirth);
+		fscanf(contacts, " %[^\n]s", cellphoneNumber);
+		fscanf(contacts, " %[^\n]s", workphoneNumber);
+		i++;
+	}
+		if(liC->first == NULL){
+			liC->first = element;
+			liC->last  = element;
+			element->after  = NULL;
+			element->before = NULL;	
+		} else if(liC->first == liC->last){
+			liC->last = element;
+			liC->first->after = element;
+			element->after   = NULL;
+			element->before = liC->first;
+		} else {
+			element->before = liC->last;
+			liC->last->after = element;
+			liC->last = element;
+			element->after   = NULL;
+		}
+		strcpy(element->completeName,    completeName);
+		strcpy(element->emailAddress,    emailAddress);
+		strcpy(element->homeAddress,     homeAddress);
+		strcpy(element->dateOfBirth,     dateOfBirth);
+		strcpy(element->cellphoneNumber, cellphoneNumber);
+		strcpy(element->workphoneNumber, workphoneNumber);
+		liC->lenght++;
+	
+	fclose(contacts);
+	
+	return element;
+};
 List *addNewElement(List *li, ListControl *liC){
 	List 	*element;
 	element = (List *) malloc(sizeof(List));
@@ -43,6 +160,7 @@ List *addNewElement(List *li, ListControl *liC){
 	strcpy(element->cellphoneNumber, getCellphoneNumber());
 	strcpy(element->workphoneNumber, getWorkphoneNumber());
 	liC->lenght++;
+	
 	return element;	
 };
 void printFullList(List *li, ListControl *liC){
@@ -60,7 +178,7 @@ void printFullList(List *li, ListControl *liC){
 	};
 	
 	printf("\n");
-	printf("\t Printing all your contacts list\n");
+	printf("\t Printing all your contact list:\n");
 	printf("\n");
 	for(element = liC->first; element != NULL; element = element->after){
 		printf("\t##########################################################################################################\n");
@@ -179,7 +297,7 @@ void removeAnElement(List *li, ListControl *liC){
 						liC->last == NULL;
 					else 
 						liC->first->before == NULL;
-				} else if (liC->first == liC->last){ // Removing last list element.
+				} else if (element == liC->last){ // Removing last list element.
 					remove = liC->last;
 					liC->last->before->after = NULL;
 					liC->last = liC->last->before;
